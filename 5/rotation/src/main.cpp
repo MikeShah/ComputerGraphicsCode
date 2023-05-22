@@ -54,7 +54,7 @@ GLuint 	gIndexBufferObject                  = 0;
 // Here we setup two shaders, a vertex shader and a fragment shader.
 // At a minimum, every Modern OpenGL program needs a vertex and a fragment
 // shader.
-float g_uOffset=0.0f;
+float g_uOffset=-2.0f;
 float g_uRotate=0.0f;
 
 // ^^^^^^^^^^^^^^^^^^^^^^^^ Globals ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -576,6 +576,7 @@ void CleanUp(){
 * @return program status
 */
 int main( int argc, char* args[] ){
+    std::cout << "Use arrow keys to move and rotate\n";
 
 	// 1. Setup the graphics program
 	InitializeProgram();
