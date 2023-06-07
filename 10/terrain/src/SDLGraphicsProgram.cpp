@@ -116,8 +116,8 @@ void SDLGraphicsProgram::Loop(){
 
 
     // Create our terrain
-    Terrain* myTerrain = new Terrain(512,512,"terrain2.ppm");
-    myTerrain->LoadTexture("colormap.ppm");
+    Terrain* myTerrain = new Terrain(512,512,"./../../common/textures/terrain2.ppm");
+    myTerrain->LoadTexture("./../../common/textures/colormap.ppm");
     // Create a node for our terrain 
     SceneNode* terrainNode;
     terrainNode = new SceneNode(myTerrain);
