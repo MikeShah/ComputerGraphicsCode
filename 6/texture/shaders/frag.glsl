@@ -20,5 +20,5 @@ void main()
 	vec4 VertexColors = vec4(v_vertexColors.r,v_vertexColors.g, v_vertexColors.b, 1.0f);
 
 	// Output color based on our texture
-	color = vec4(diffuseColor,1.0f) * VertexColors;
+	color = vec4(diffuseColor,1.0f);
 }
