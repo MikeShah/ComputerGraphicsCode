@@ -1,3 +1,6 @@
+// @sdl.cpp
+// Compile and run: 
+// g++ sdl.cpp -o prog -lSDL2 && ./prog
 #include <SDL2/SDL.h>
 #include <iostream>
 
