@@ -1,4 +1,5 @@
 // @file ooc.cpp
+// g++ ooc.cpp -std=c++20 -o prog
 // Object-Oriented 'C' programming
 // Overly simplistic example to help you understand how OpenGL works
 #include <iostream>
