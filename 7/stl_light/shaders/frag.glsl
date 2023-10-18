@@ -24,5 +24,5 @@ void main()
     vec3 Lighting = normalize(v_vertexColors) * (diffuse);
 
     // Send fragment to output
-	color = vec4(Lighting.x,Lighting.y,Lighting.z, 1.0f);
+		color = vec4(Lighting.x,Lighting.y,Lighting.z, 1.0f);
 }

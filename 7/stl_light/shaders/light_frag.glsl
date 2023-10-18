@@ -1,12 +1,10 @@
 #version 410 core
-// Uniform Light Variables
-uniform vec3 u_LightPos;
-
 out vec4 color;
 
 // Entry point of program
 void main()
 {
-    // Send fragment to output
-	color = vec4(1.0f,0.0f,0.0f, 1.0f);
+   	// Send fragment to output
+		// 'Default' as a yellow color
+		color = vec4(0.85f, 0.96f, 0.65f, 1.0f);
 }
