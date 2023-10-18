@@ -1,9 +1,21 @@
 /* Compilation on Linux: 
  g++ -std=c++17 ./src/*.cpp -o prog -I ./include/ -I./../common/thirdparty/ -lSDL2 -ldl
 */
+// ==================== Libraries ==================
+// Depending on the operating system we use
+// The paths to SDL are actually different.
+// The #define statement should be passed in
+// when compiling using the -D argument.
+// This gives an example of how a programmer
+// may support multiple platforms with different
+// dependencies.
+#if defined(LINUX) || defined(MINGW)
+    #include <SDL2/SDL.h>
+#else // This works for Mac
+    #include <SDL.h>
+#endif
 
 // Third Party Libraries
-#include <SDL2/SDL.h>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
@@ -32,6 +44,7 @@ int gScreenHeight 						= 480;
 SDL_Window* gGraphicsApplicationWindow 	= nullptr;
 SDL_GLContext gOpenGLContext			= nullptr;
 
+
 // Main loop flag
 bool gQuit = false; // If this is quit = 'true' then the program terminates.
 
@@ -47,6 +60,11 @@ GLuint gVertexArrayObjectBunny= 0;
 // VBOs are our mechanism for arranging geometry on the GPU.
 GLuint  gVertexBufferObjectBunny[3];
 
+// shader
+// The following stores the a unique id for the graphics pipeline
+// program object that will be used for our OpenGL draw calls.
+GLuint gGraphicsPipelineShaderProgram	= 0;
+
 // Camera
 Camera gCamera;
 
@@ -59,11 +77,113 @@ struct Light{
     float mAmbientIntensity{0.5f};
     glm::vec3 mPosition;
 
+	GLuint mShaderID;	
     GLuint mVAO;
     GLuint mVBO;
 
+    /// Constructor
+	Light(){}
+
+    // Initialization function that can be called after
+    // OpenGL has been setup
+    void initialize()
+    {
+		std::string vertexShaderSource      = LoadShaderAsString("./shaders/light_vert.glsl");
+		std::string fragmentShaderSource    = LoadShaderAsString("./shaders/light_frag.glsl");
+
+		mShaderID = CreateShaderProgram(vertexShaderSource,fragmentShaderSource);
+
+		// Vertice positions don't really matter, because all
+		// I really want is a 'point' in space
+		const GLfloat vertices[] = {0.0f,0.0f,0.0f};  
+		// Vertex Arrays Object (VAO) Setup
+		glGenVertexArrays(1, &mVAO);
+		// We bind (i.e. select) to the Vertex Array Object (VAO) that we want to work withn.
+		glBindVertexArray(mVAO);
+
+		// Vertex Buffer Object (VBO) creation
+		glGenBuffers(1, &mVBO);
+
+		// Populate our vertex buffer objects
+		// Position information (x,y,z)
+		glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+		// NOTE: vertices is 'stack allocated' so I can use 'sizeof'
+		glBufferData(GL_ARRAY_BUFFER,sizeof(vertices), vertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+    	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,0,(void*)0);
+		
+		// Unbind our currently bound Vertex Array Object
+		glBindVertexArray(0);
+		// Disable any attributes we opened in our Vertex Attribute Arrray,
+		// as we do not want to leave them open. 
+		glDisableVertexAttribArray(0);
+	}
+
+	void Draw(){
+		// Use the light shader prior to drawing
+		glUseProgram(mShaderID);
+
+        // Update Light Position in a 'circle' on flat z-axis 
+        static float increment=0.0f;
+        increment += 0.017f;
+        if(increment > 2*M_PI) { increment=0.0f;}
+        mPosition.x = cos(increment) * 3;
+        mPosition.y = 2.0f;
+        mPosition.z = sin(increment) * 3;
+        
+       glPointSize( 10.0f); 
+        // Model transformation by translating our object into world space
+        glm::mat4 model = glm::translate(glm::mat4(1.0f),mPosition); 
+
+        // Retrieve our location of our Model Matrix
+        GLint u_ModelMatrixLocation = glGetUniformLocation( mShaderID,"u_ModelMatrix");
+        if(u_ModelMatrixLocation >=0){
+            glUniformMatrix4fv(mShaderID,1,GL_FALSE,&model[0][0]);
+        }else{
+            std::cout << "Could not find u_ModelMatrix, maybe a mispelling?\n";
+            exit(EXIT_FAILURE);
+        }
+
+        // Setup Uniform variables here
+        // Retrieve our location of our Model Matrix
+        GLint u_LightPos = glGetUniformLocation( mShaderID,"u_LightPos");
+        std::cout << "x: " << mPosition[0] << std::endl;
+        if(u_LightPos >=0){
+            glUniform3fv(u_LightPos, 1, &mPosition[0]);
+        }else{
+            std::cout << "Could not find u_LightPos, maybe a mispelling?\n";
+            exit(EXIT_FAILURE);
+        }
+
+        glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
+                                                 (float)gScreenWidth/(float)gScreenHeight,
+                                                 0.1f,
+                                                 20.0f);
+
+        // Retrieve our location of our perspective matrix uniform 
+        GLint u_ProjectionLocation= glGetUniformLocation( gGraphicsPipelineShaderProgram,"u_Projection");
+        if(u_ProjectionLocation>=0){
+            glUniformMatrix4fv(u_ProjectionLocation,1,GL_FALSE,&perspective[0][0]);
+        }else{
+            std::cout << "Could not find u_Perspective, maybe a mispelling?\n";
+            exit(EXIT_FAILURE);
+        }
+
+		// Enable our attributes
+		glBindVertexArray(mVAO);
+
+		//Render data
+		glDrawArrays(GL_POINTS,0,3);
+
+		// Stop using our current graphics pipeline
+		// Note: This is not necessary if we only have one graphics pipeline.
+		glUseProgram(0);
+        glPointSize( 1.0f); 
+	}
+
 };
 
+// Light object
 Light gLight;
 
 
@@ -129,6 +249,9 @@ void InitializeProgram(){
 		std::cout << "glad did not initialize" << std::endl;
 		exit(1);
 	}
+
+    // Setup Lights
+    gLight.initialize();
 	
 }
 
@@ -322,14 +445,6 @@ void PreDraw(){
     }
     
 
-    static float increment=0.0f;
-    increment += 0.017f;
-    if(increment > 2*M_PI) { increment=0.0f;}
-    gLight.mPosition.x = cos(increment) * 5;
-    gLight.mPosition.y = 2.0f;
-    gLight.mPosition.z = sin(increment) * 5;
-
-//    std::cout << increment << " lightPosition: (" << gLight.mPosition.x << "," << gLight.mPosition.y<< "," << gLight.mPosition.z << ")" << std::endl;
 
     // Setup the Lights 
     GLint loc = glGetUniformLocation( gGraphicsPipelineShaderProgram,"u_LightPos");
@@ -360,6 +475,9 @@ void Draw(){
 	// Stop using our current graphics pipeline
 	// Note: This is not necessary if we only have one graphics pipeline.
     glUseProgram(0);
+
+    // Draw our lights
+    gLight.Draw();
 }
 
 /**
@@ -464,6 +582,9 @@ void MainLoop(){
 
 	// While application is running
 	while(!gQuit){
+		// Type of start of frame
+		Uint32 start = SDL_GetTicks();
+
 		// Handle Input
 		Input();
 		// Setup anything (i.e. OpenGL State) that needs to take
@@ -475,6 +596,15 @@ void MainLoop(){
         //      The pipeline that is utilized is whatever 'glUseProgram' is
         //      currently binded.
 		Draw();
+
+		// Calculate how much time has elapsed
+		// since the start of the frame, and delay
+		// for the difference in milliseconds to attempt
+		// to get 60 fps for systems that run too fast
+		Uint32 elapsedTime = SDL_GetTicks() - start;
+		if(elapsedTime < 16){
+			SDL_Delay(16-elapsedTime);
+		}
 
 		//Update screen of our specified window
 		SDL_GL_SwapWindow(gGraphicsApplicationWindow);

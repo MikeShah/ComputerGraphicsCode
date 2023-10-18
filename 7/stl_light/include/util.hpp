@@ -1,10 +1,4 @@
-#include <SDL2/SDL.h>
 #include <glad/glad.h>
-
-// shader
-// The following stores the a unique id for the graphics pipeline
-// program object that will be used for our OpenGL draw calls.
-GLuint gGraphicsPipelineShaderProgram	= 0;
 
 // vvvvvvvvvvvvvvvvvvv Error Handling Routines vvvvvvvvvvvvvvv
 static void GLClearAllErrors(){
