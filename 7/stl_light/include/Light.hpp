@@ -21,6 +21,8 @@ struct Light{
     // OpenGL has been setup
     void Initialize();
 
+    // Operations that happen before drawing
+    void PreDraw();
 	// Draw a light
 	void Draw();
 

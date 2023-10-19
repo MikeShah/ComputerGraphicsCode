@@ -15,15 +15,15 @@ void main()
     // Normalize every attribute incoming
     // from vertex shader because they are
     // interpolated values
-    vec3 normals  = normalize(-v_vertexNormals); 
+    vec3 normals  = normalize(v_vertexNormals); 
     vec3 lightDirection = normalize(u_LightPos - v_worldSpaceFragment);
 
     // Compute the diffuse component by taking the dot product of the incoming light direction
     float diffuse =  max(0.0,dot(lightDirection,normals));
 
     // Compute the final lighting
-    vec3 Lighting = v_vertexColors * (diffuse);
+    vec3 Lighting = normals * (diffuse);
 	
     // Send fragment to output
-		color = vec4(Lighting.x,Lighting.y,Lighting.z, 1.0f);
+	color = vec4(Lighting.x,Lighting.y,Lighting.z, 1.0f);
 }

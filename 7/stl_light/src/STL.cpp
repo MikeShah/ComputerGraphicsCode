@@ -57,7 +57,34 @@ STLFile::STLFile(){
             }
         }
 
-				// Compute the surface normal manually -- STL file is not trustworthy...
+		// Compute the surface normal manually -- STL file is not trustworthy...
+        // Iterate through 9 vertices at a time
+        for(int i=0; i < mVertices.size(); i+=9){
+            glm::vec3 v1 (mVertices[i],mVertices[i+1],mVertices[i+2]);
+            glm::vec3 v2 (mVertices[i+3],mVertices[i+4],mVertices[i+5]);
+            glm::vec3 v3 (mVertices[i+6],mVertices[i+7],mVertices[i+8]);
+
+            glm::vec3 edge1 = v2 - v1;
+            glm::vec3 edge2 = v3 - v2;
+
+            glm::vec3 normal = cross(edge1,edge2);
+            std::cout << "mine:" << normal.x << "," << normal.y << "," << normal.z << std::endl;
+            std::cout << "them:" <<  mNormals[i] << "," << mNormals[i+1] << "," <<  mNormals[i+2] << std::endl;
+
+            // Replace the normlals
+            mNormals[i+0] = normal.x;
+            mNormals[i+1] = normal.y;
+            mNormals[i+2] = normal.z;
+
+            mNormals[i+3] = normal.x;
+            mNormals[i+4] = normal.y;
+            mNormals[i+5] = normal.z;
+
+            mNormals[i+6] = normal.x;
+            mNormals[i+7] = normal.y;
+            mNormals[i+8] = normal.z;
+
+        }
 
 
     }
@@ -113,14 +140,14 @@ void STLFile::Initialize(){
 		glDisableVertexAttribArray(2);
 }
 
-void STLFile::Draw(){
+void STLFile::PreDraw(){
     // Use our shader
 	glUseProgram(mShaderID);
 
     // Model transformation by translating our object into world space
     glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,0.0f)); 
     static float rot=0.0f;
-//    rot += 0.1f; // Uncomment to add a rotation
+    //      rot += 0.1f; // Uncomment to add a rotation
     model = glm::rotate(model,glm::radians(rot),glm::vec3(0.0f,1.0f,0.0f)); 
 
     // Retrieve our location of our Model Matrix
@@ -166,6 +193,11 @@ void STLFile::Draw(){
         std::cout << "Could not find u_LightPos" << std::endl;
         exit(EXIT_FAILURE);
     }
+
+}
+
+
+void STLFile::Draw(){
 
     //Render data
 	glBindVertexArray(mVAO);

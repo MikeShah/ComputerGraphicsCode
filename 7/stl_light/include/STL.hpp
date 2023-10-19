@@ -31,6 +31,7 @@ struct STLFile{
 		STLFile();
 		~STLFile();
 		void Initialize();
+        void PreDraw();
 		void Draw();
 		std::vector<float> GetVertices() const;
 		std::vector<float> GetNormals() const;

@@ -121,6 +121,8 @@ void PreDraw(){
 
     //Clear color buffer and Depth Buffer
   	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+
 }
 
 /**
@@ -133,8 +135,10 @@ void PreDraw(){
 */
 void Draw(){
 	// Draw our Bunny
+    g.gBunny->PreDraw();
 	g.gBunny->Draw();
     // Draw our light
+    g.gLight.PreDraw();
     g.gLight.Draw();
 }
 

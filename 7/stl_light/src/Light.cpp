@@ -91,7 +91,7 @@ void Light::Initialize()
     std::cout << "Light.mVBO: " << mVBO << std::endl;
 }
 
-void Light::Draw(){
+void Light::PreDraw(){
     // Use the light shader prior to drawing
     glUseProgram(mShaderID);
 
@@ -100,9 +100,9 @@ void Light::Draw(){
     increment += 0.017f;
     if(increment > 2*M_PI) { increment=0.0f;}
     
-    mPosition.x = cos(increment) * 3;
+    mPosition.x = cos(increment) * 2;
     mPosition.y = 0.0f;
-    mPosition.z = sin(increment) * 3; 
+    mPosition.z = sin(increment) * 2; 
 
     // Model transformation by translating our object into world space
     glm::mat4 model = glm::mat4(1.0f);
@@ -124,9 +124,12 @@ void Light::Draw(){
         exit(EXIT_FAILURE);
     }
 
+}
+
+void Light::Draw(){
+
     //Render data
     glBindVertexArray(mVAO);
-    glBindBuffer(GL_ARRAY_BUFFER,mVBO);
     glDrawArrays(GL_TRIANGLES,0,36);
 
     // Stop using our current graphics pipeline
