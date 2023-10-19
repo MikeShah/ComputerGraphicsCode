@@ -56,6 +56,10 @@ STLFile::STLFile(){
                 mNormals.push_back(threeBack+2);
             }
         }
+
+				// Compute the surface normal manually -- STL file is not trustworthy...
+
+
     }
 }
 

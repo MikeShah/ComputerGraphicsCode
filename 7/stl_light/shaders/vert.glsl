@@ -28,8 +28,7 @@ void main()
     v_vertexNormals= vertexNormals;
 
     // Calculate in world space the position of the vertex
-    vec4 FragPos = u_ModelMatrix*vec4(position,1.0f);
-    v_worldSpaceFragment = vec3(FragPos);
+    v_worldSpaceFragment = vec3( u_ModelMatrix*vec4(position,1.0f));
 
     // Compute the MVP matrix
     gl_Position = u_Projection * u_ViewMatrix * u_ModelMatrix * vec4(position,1.0f);
