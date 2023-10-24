@@ -7,13 +7,13 @@
 
 
 // vvvvvvvvvvvvvvvvvvv Error Handling Routines vvvvvvvvvvvvvvv
-static void GLClearAllErrors(){
+void GLClearAllErrors(){
     while(glGetError() != GL_NO_ERROR){
     }
 }
 
 // Returns true if we have an error
-static bool GLCheckErrorStatus(const char* function, int line){
+bool GLCheckErrorStatus(const char* function, int line){
     while(GLenum error = glGetError()){
         std::cout << "OpenGL Error:" << error 
                   << "\tLine: " << line 

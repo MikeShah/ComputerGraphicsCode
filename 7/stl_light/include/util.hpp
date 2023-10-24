@@ -8,10 +8,10 @@
 
 
 // vvvvvvvvvvvvvvvvvvv Error Handling Routines vvvvvvvvvvvvvvv
-static void GLClearAllErrors();
+void GLClearAllErrors();
 
 // Returns true if we have an error
-static bool GLCheckErrorStatus(const char* function, int line);
+bool GLCheckErrorStatus(const char* function, int line);
 
 #define GLCheck(x) GLClearAllErrors(); x; GLCheckErrorStatus(#x,__LINE__);
 // ^^^^^^^^^^^^^^^^^^^ Error Handling Routines ^^^^^^^^^^^^^^^
