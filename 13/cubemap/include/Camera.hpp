@@ -17,9 +17,6 @@ class Camera{
 public:
 	// Constructor to create a camera
     Camera();
-    // Return a 'view' matrix with our
-    // camera transformation applied.
-    glm::mat4 GetViewMatrix() const;
     // Move the camera around
     void MouseLook(int mouseX, int mouseY);
     void MoveForward(float speed);
@@ -42,6 +39,10 @@ public:
     float GetViewYDirection();
     // Returns the Z 'view' direction
     float GetViewZDirection();
+    // Return a 'view' matrix with our
+    // camera transformation applied.
+    glm::mat4 GetViewMatrix() const;
+    glm::mat4 GetPerspectiveMatrix(int screenWidth, int screenHeight) ;
 private:
 
     // Track the old mouse position
@@ -55,8 +56,10 @@ private:
     // to 'rock' or 'rattle' the camera you might play
     // with modifying this value.
     glm::vec3 m_upVector;
-};
 
+    // Projection matrix (in perspective) 
+    glm::mat4 mPerspective;
+};
 
 
 

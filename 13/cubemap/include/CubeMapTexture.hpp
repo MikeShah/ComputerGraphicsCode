@@ -13,6 +13,7 @@
 
 #include <glad/glad.h>
 #include <string>
+#include <vector>
 
 class CubeMapTexture{
 public:
@@ -21,7 +22,7 @@ public:
     // Destructor
     ~CubeMapTexture();
 	// Loads and sets up an actual texture
-    void LoadCubeMapTexture(const std::string filepath);
+    void LoadCubeMapTexture(const std::vector<std::string> filepaths);
 	// slot tells us which slot we want to bind to.
     // We can have multiple slots. By default, we
     // will set our slot to 0 if it is not specified.
@@ -30,11 +31,11 @@ public:
     void Unbind();
 private:
     // Store a unique ID for the texture
-    GLuint m_textureID;
+    GLuint m_cubeMapTextureID;
 	// Filepath to the image loaded
-    std::string m_filepath;
+    std::vector<std::string> m_filepaths;
     // Store whatever image data inside of our texture class.
-    Image* m_image;
+    std::vector<Image*> m_images;
 };
 
 

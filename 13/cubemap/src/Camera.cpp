@@ -78,10 +78,12 @@ float Camera::GetViewZDirection(){
 }
 
 
+
 Camera::Camera(){
     std::cout << "(Constructor) Created a Camera!\n";
+
 	// Position us at the origin.
-    m_eyePosition = glm::vec3(0.0f,0.0f, 0.0f);
+    m_eyePosition = glm::vec3(0.0f,0.0f, 1.0f);
 	// Looking down along the z-axis initially.
 	// Remember, this is negative because we are looking 'into' the scene.
     m_viewDirection = glm::vec3(0.0f,0.0f, -1.0f);
@@ -95,4 +97,16 @@ glm::mat4 Camera::GetViewMatrix() const{
     return glm::lookAt( m_eyePosition,
                         m_eyePosition + m_viewDirection,
                         m_upVector);
+}
+
+/// TODO: Can make near and far planes more customizable
+glm::mat4 Camera::GetPerspectiveMatrix(int screenWidth, int screenHeight){
+
+    // TODO: Could memoize this value if it does not change
+    mPerspective= glm::perspective(glm::radians(45.0f),
+                            (float)screenWidth/(float)screenHeight,
+                            0.1f,
+                            10.0f);
+
+    return mPerspective;
 }

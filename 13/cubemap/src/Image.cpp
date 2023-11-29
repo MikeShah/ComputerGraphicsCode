@@ -6,7 +6,7 @@
 #include <memory>
 
 // Constructor
-Image::Image(std::string filepath) : m_filepath(filepath){
+Image::Image(){ 
     
 }
 
@@ -26,7 +26,8 @@ Image::~Image (){
 //
 // flip - Will flip the pixels upside down in the data
 //        If you use this be consistent.
-void Image::LoadPPM(bool flip){
+void Image::LoadPPM(std::string filepath, bool flip){
+  m_filepath = filepath;
 
   // Open an input file stream for reading a file
   std::ifstream ppmFile(m_filepath.c_str());

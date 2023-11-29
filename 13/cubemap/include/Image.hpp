@@ -14,11 +14,11 @@
 class Image {
 public:
     // Constructor for creating an image
-    Image (std::string filepath);
+    Image ();
     // Destructor
     ~Image();
     // Loads a PPM from memory.
-    void LoadPPM(bool flip);
+    void LoadPPM(std::string filepath, bool flip);
     // Return the width
     inline int GetWidth(){
         return m_width;

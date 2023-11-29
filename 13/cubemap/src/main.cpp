@@ -1,10 +1,14 @@
-
 /* Compilation on Linux: 
  g++ -std=c++17 ./src/*.cpp -o prog -I ./include/ -I./../common/thirdparty/ -lSDL2 -ldl
 */
 
 // Third Party Libraries
-#include <SDL2/SDL.h>
+#if defined(LINUX) || defined(MINGW)
+    #include <SDL2/SDL.h>
+#else // This works for Mac
+    #include <SDL.h>
+#endif
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
@@ -15,12 +19,14 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <fstream>
 
 // Our libraries
+#include "util.hpp"
 #include "Camera.hpp"
 #include "Texture.hpp"
 #include "CubeMapTexture.hpp"
+#include "shader.hpp"
+#include "MeshFactory.hpp"
 
 // vvvvvvvvvvvvvvvvvvvvvvvvvv Globals vvvvvvvvvvvvvvvvvvvvvvvvvv
 // Globals generally are prefixed with 'g' in this application.
@@ -31,29 +37,20 @@ int gScreenHeight 						= 480;
 SDL_Window* gGraphicsApplicationWindow 	= nullptr;
 SDL_GLContext gOpenGLContext			= nullptr;
 
+MeshFactory gPlane;
+MeshFactory gSkybox;
+
 // Main loop flag
 bool gQuit = false; // If this is quit = 'true' then the program terminates.
 
-// shader
-// The following stores the a unique id for the graphics pipeline
-// program object that will be used for our OpenGL draw calls.
-GLuint gGraphicsPipelineShaderProgram	= 0;
 
-// OpenGL Objects
-// Vertex Array Object (VAO)
-// Vertex array objects encapsulate all of the items needed to render an object.
-// For example, we may have multiple vertex buffer objects (VBO) related to rendering one
-// object. The VAO allows us to setup the OpenGL state to render that object using the
-// correct layout and correct buffers with one call after being setup.
-GLuint gVertexArrayObject					= 0;
-// Vertex Buffer Object (VBO)
-// Vertex Buffer Objects store information relating to vertices (e.g. positions, normals, textures)
-// VBOs are our mechanism for arranging geometry on the GPU.
-GLuint 	gVertexBufferObject					= 0;
-// Index Buffer Object (IBO)
-// This is used to store the array of indices that we want
-// to draw from, when we do indexed drawing.
-GLuint 	gIndexBufferObject                  = 0;
+struct Resource{
+        // We will load a texture here prior
+};
+
+
+Shader  gGraphicsPipelineShaderProgram;
+Shader  gCubeMapShaderProgram;
 
 // Shaders
 // Here we setup two shaders, a vertex shader and a fragment shader.
@@ -66,174 +63,10 @@ float g_uRotate=0.0f;
 Camera gCamera;
 
 // Texture
-CubeMapTexture gCubeRight;
-CubeMapTexture gCubeLeft;
-CubeMapTexture gCubeTop;
-CubeMapTexture gCubeBottom;
-CubeMapTexture gCubeBack;
-CubeMapTexture gCubeFront;
+Texture        gTexture;
+CubeMapTexture gCubeMapTexture;
 
 // ^^^^^^^^^^^^^^^^^^^^^^^^ Globals ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-// vvvvvvvvvvvvvvvvvvv Error Handling Routines vvvvvvvvvvvvvvv
-static void GLClearAllErrors(){
-    while(glGetError() != GL_NO_ERROR){
-    }
-}
-
-// Returns true if we have an error
-static bool GLCheckErrorStatus(const char* function, int line){
-    while(GLenum error = glGetError()){
-        std::cout << "OpenGL Error:" << error 
-                  << "\tLine: " << line 
-                  << "\tfunction: " << function << std::endl;
-        return true;
-    }
-    return false;
-}
-
-#define GLCheck(x) GLClearAllErrors(); x; GLCheckErrorStatus(#x,__LINE__);
-// ^^^^^^^^^^^^^^^^^^^ Error Handling Routines ^^^^^^^^^^^^^^^
-
-
-
-/**
-* LoadShaderAsString takes a filepath as an argument and will read line by line a file and return a string that is meant to be compiled at runtime for a vertex, fragment, geometry, tesselation, or compute shader.
-* e.g.
-*       LoadShaderAsString("./shaders/filepath");
-*
-* @param filename Path to the shader file
-* @return Entire file stored as a single string 
-*/
-std::string LoadShaderAsString(const std::string& filename){
-    // Resulting shader program loaded as a single string
-    std::string result = "";
-
-    std::string line = "";
-    std::ifstream myFile(filename.c_str());
-
-    if(myFile.is_open()){
-        while(std::getline(myFile, line)){
-            result += line + '\n';
-        }
-        myFile.close();
-
-    }
-
-    return result;
-}
-
-
-/**
-* CompileShader will compile any valid vertex, fragment, geometry, tesselation, or compute shader.
-* e.g.
-*	    Compile a vertex shader: 	CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
-*       Compile a fragment shader: 	CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-*
-* @param type We use the 'type' field to determine which shader we are going to compile.
-* @param source : The shader source code.
-* @return id of the shaderObject
-*/
-GLuint CompileShader(GLuint type, const std::string& source){
-	// Compile our shaders
-	GLuint shaderObject;
-
-	// Based on the type passed in, we create a shader object specifically for that
-	// type.
-	if(type == GL_VERTEX_SHADER){
-		shaderObject = glCreateShader(GL_VERTEX_SHADER);
-	}else if(type == GL_FRAGMENT_SHADER){
-		shaderObject = glCreateShader(GL_FRAGMENT_SHADER);
-	}
-
-	const char* src = source.c_str();
-	// The source of our shader
-	glShaderSource(shaderObject, 1, &src, nullptr);
-	// Now compile our shader
-	glCompileShader(shaderObject);
-
-	// Retrieve the result of our compilation
-	int result;
-	// Our goal with glGetShaderiv is to retrieve the compilation status
-	glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
-
-	if(result == GL_FALSE){
-		int length;
-		glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &length);
-		char* errorMessages = new char[length]; // Could also use alloca here.
-		glGetShaderInfoLog(shaderObject, length, &length, errorMessages);
-
-		if(type == GL_VERTEX_SHADER){
-			std::cout << "ERROR: GL_VERTEX_SHADER compilation failed!\n" << errorMessages << "\n";
-		}else if(type == GL_FRAGMENT_SHADER){
-			std::cout << "ERROR: GL_FRAGMENT_SHADER compilation failed!\n" << errorMessages << "\n";
-		}
-		// Reclaim our memory
-		delete[] errorMessages;
-
-		// Delete our broken shader
-		glDeleteShader(shaderObject);
-
-		return 0;
-	}
-
-  return shaderObject;
-}
-
-
-
-/**
-* Creates a graphics program object (i.e. graphics pipeline) with a Vertex Shader and a Fragment Shader
-*
-* @param vertexShaderSource Vertex source code as a string
-* @param fragmentShaderSource Fragment shader source code as a string
-* @return id of the program Object
-*/
-GLuint CreateShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource){
-
-    // Create a new program object
-    GLuint programObject = glCreateProgram();
-
-    // Compile our shaders
-    GLuint myVertexShader   = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    GLuint myFragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-
-    // Link our two shader programs together.
-	// Consider this the equivalent of taking two .cpp files, and linking them into
-	// one executable file.
-    glAttachShader(programObject,myVertexShader);
-    glAttachShader(programObject,myFragmentShader);
-    glLinkProgram(programObject);
-
-    // Validate our program
-    glValidateProgram(programObject);
-
-    // Once our final program Object has been created, we can
-	// detach and then delete our individual shaders.
-    glDetachShader(programObject,myVertexShader);
-    glDetachShader(programObject,myFragmentShader);
-	// Delete the individual shaders once we are done
-    glDeleteShader(myVertexShader);
-    glDeleteShader(myFragmentShader);
-
-    return programObject;
-}
-
-
-/**
-* Create the graphics pipeline
-*
-* @return void
-*/
-void CreateGraphicsPipeline(){
-
-    std::string vertexShaderSource      = LoadShaderAsString("./shaders/vert.glsl");
-    std::string fragmentShaderSource    = LoadShaderAsString("./shaders/frag.glsl");
-
-	gGraphicsPipelineShaderProgram = CreateShaderProgram(vertexShaderSource,fragmentShaderSource);
-}
 
 
 /**
@@ -259,7 +92,7 @@ void InitializeProgram(){
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 	// Create an application window using OpenGL that supports SDL
-	gGraphicsApplicationWindow = SDL_CreateWindow( "OpenGL First Program",
+	gGraphicsApplicationWindow = SDL_CreateWindow( "SkyBox and Abstraction Program",
 													SDL_WINDOWPOS_UNDEFINED,
 													SDL_WINDOWPOS_UNDEFINED,
 													gScreenWidth,
@@ -285,226 +118,20 @@ void InitializeProgram(){
 		exit(1);
 	}
 	
-}
+    // Setup a textured plane
+    gPlane.MakeTexturedPlane();
+    gTexture.LoadTexture("./cat3.ppm");
+    // Setup a graphics pipeline for basic meshes
+	gGraphicsPipelineShaderProgram.CreateShaderProgram("./shaders/vert.glsl","./shaders/frag.glsl");
 
-/**
-* Setup your geometry during the vertex specification step
-*
-* @return void
-*/
-void VertexSpecification(){
-
-	// We will load a texture here prior
-    gCubeRight.LoadCubeMapTexture("./right.ppm");
-    gCubeLeft.LoadCubeMapTexture("./left.ppm");
-    gCubeTop.LoadCubeMapTexture("./top.ppm");
-    gCubeBottom.LoadCubeMapTexture("./bottom.ppm");
-    gCubeBack.LoadCubeMapTexture("./back.ppm");
-    gCubeFront.LoadCubeMapTexture("./front.ppm");
-
-	// Geometry Data
-	// Here we are going to store x,y, and z position attributes within vertexPositons for the data.
-	// For now, this information is just stored in the CPU, and we are going to store this data
-	// on the GPU shortly, in a call to glBufferData which will store this information into a
-	// vertex buffer object.
-	// Note: That I have segregated the data from the OpenGL calls which follow in this function.
-	//       It is not strictly necessary, but I find the code is cleaner if OpenGL (GPU) related
-	//       functions are packed closer together versus CPU operations.
-	const std::vector<GLfloat> vertexData
-	{
-    // 0 - Vertex
-		-0.5f, -0.5f, 0.0f, 	// Left vertex position
-		1.0f,  0.0f, 0.0f, 	  // color
-		 0.0f, 0.0f,       		// texture coordinate
-    // 1 - Vertex
-		0.5f, -0.5f, 0.0f,  	// right vertex position
-		0.0f,  1.0f, 0.0f,  	// color
-		1.0f , 0.0f,		      // texture coordinate
-		// 2 - Vertex
-		-0.5f,  0.5f, 0.0f,  	// Top left vertex position
-		0.0f,  0.0f, 1.0f,  	// color
-		0.0f, 1.0f, 					// texture coordinate
-        // 3 - Vertex
-		0.5f,  0.5f, 0.0f,  	// Top-right position
-		0.0f,  0.0f, 1.0f,  	// color
-		1.0f,1.0f, 					  // texture coordinate
-	};
-
-
-	// Vertex Arrays Object (VAO) Setup
-	// Note: We can think of the VAO as a 'wrapper around' all of the Vertex Buffer Objects,
-	//       in the sense that it encapsulates all VBO state that we are setting up.
-	//       Thus, it is also important that we glBindVertexArray (i.e. select the VAO we want to use)
-	//       before our vertex buffer object operations.
-	glGenVertexArrays(1, &gVertexArrayObject);
-	// We bind (i.e. select) to the Vertex Array Object (VAO) that we want to work withn.
-	glBindVertexArray(gVertexArrayObject);
-
-	// Vertex Buffer Object (VBO) creation
-	// Create a new vertex buffer object
-	// Note:  We’ll see this pattern of code often in OpenGL of creating and binding to a buffer.
-	glGenBuffers(1, &gVertexBufferObject);
-	// Next we will do glBindBuffer.
-	// Bind is equivalent to 'selecting the active buffer object' that we want to
-	// work with in OpenGL.
-	glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
-	// Now, in our currently binded buffer, we populate the data from our
-	// 'vertexPositions' (which is on the CPU), onto a buffer that will live
-	// on the GPU.
-	glBufferData(GL_ARRAY_BUFFER, 								// Kind of buffer we are working with 
-																// (e.g. GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER)
-				 vertexData.size() * sizeof(GL_FLOAT), 	        // Size of data in bytes
-				 vertexData.data(), 						    // Raw array of data
-				 GL_STATIC_DRAW);								// How we intend to use the data
- 
-    // Index buffer data for a quad
-    const std::vector<GLuint> indexBufferData {2,0,1, 3,2,1};
-    // Setup the Index Buffer Object (IBO i.e. EBO)
-    glGenBuffers(1,&gIndexBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
-                 gIndexBufferObject);
-    // Populate our Index Buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indexBufferData.size()*sizeof(GLuint),
-                 indexBufferData.data(),
-                 GL_STATIC_DRAW);
-
-
-	// For our Given Vertex Array Object, we need to tell OpenGL
-	// 'how' the information in our buffer will be used.
-	glEnableVertexAttribArray(0);
-	// For the specific attribute in our vertex specification, we use
-	// 'glVertexAttribPointer' to figure out how we are going to move
-	// through the data.
-    glVertexAttribPointer(0,  		// Attribute 0 corresponds to the enabled glEnableVertexAttribArray
-							  		// In the future, you'll see in our vertex shader this also correspond
-							  		// to (layout=0) which selects these attributes.
-                          3,  		// The number of components (e.g. x,y,z = 3 components)
-                          GL_FLOAT, // Type
-                          GL_FALSE, // Is the data normalized
-                          sizeof(GL_FLOAT)*8, 		// Stride
-                         (void*)0	// Offset
-    );
-
-
-    // Now linking up the attributes in our VAO
-    // Color information
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1,
-                          3, // r,g,b
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(GL_FLOAT)*8,
-                          (GLvoid*)(sizeof(GL_FLOAT)*3)
-            );
-
-    // Now linking up the attributes in our VAO
-    // Texture :information
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2,
-                          2, // s,t
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(GL_FLOAT)*8,
-                          (GLvoid*)(sizeof(GL_FLOAT)*6)
-            );
-
-
-	// Unbind our currently bound Vertex Array Object
-	glBindVertexArray(0);
-	// Disable any attributes we opened in our Vertex Attribute Arrray,
-	// as we do not want to leave them open. 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-}
-
-
-/**
-* PreDraw
-* Typically we will use this for setting some sort of 'state'
-* Note: some of the calls may take place at different stages (post-processing) of the
-* 		 pipeline.
-* @return void
-*/
-void PreDraw(){
-	// Disable depth test and face culling.
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-		// Enable texture mapping
-		glEnable(GL_TEXTURE_2D);
-
-    // Initialize clear color
-    // This is the background of the screen.
-    glViewport(0, 0, gScreenWidth, gScreenHeight);
-    glClearColor( 1.f, 1.f, 0.f, 1.f );
-
-    //Clear color buffer and Depth Buffer
-  	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    // Use our shader
-		// Note: Make sure to call 'use program' before looking up uniform values, otherwise
-		// 			 you may not get anything returned.
-		// 			 See: https://www.khronos.org/opengl/wiki/GLSL_:_common_mistakes#glUniform_doesn't_work
-   	glUseProgram(gGraphicsPipelineShaderProgram);
-
-    // Model transformation by translating our object into world space
-    glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,g_uOffset)); 
-
-    // Update our model matrix by applying a rotation after our translation
-    model           = glm::rotate(model,glm::radians(g_uRotate),glm::vec3(0.0f,1.0f,0.0f));
-
-    // Retrieve our location of our Model Matrix
-    GLint u_ModelMatrixLocation = glGetUniformLocation( gGraphicsPipelineShaderProgram,"u_ModelMatrix");
-    if(u_ModelMatrixLocation >=0){
-        glUniformMatrix4fv(u_ModelMatrixLocation,1,GL_FALSE,&model[0][0]);
-    }else{
-        std::cout << "Could not find u_ModelMatrix, maybe a mispelling?\n";
-        exit(EXIT_FAILURE);
-    }
-
-    // Update the View Matrix
-    GLint u_ViewMatrixLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram,"u_ViewMatrix");
-    if(u_ViewMatrixLocation>=0){
-        glm::mat4 viewMatrix = gCamera.GetViewMatrix();
-        glUniformMatrix4fv(u_ViewMatrixLocation,1,GL_FALSE,&viewMatrix[0][0]);
-    }else{
-        std::cout << "Could not find u_ModelMatrix, maybe a mispelling?\n";
-        exit(EXIT_FAILURE);
-    }
-
-    // Projection matrix (in perspective) 
-    glm::mat4 perspective = glm::perspective(glm::radians(45.0f),
-                                             (float)gScreenWidth/(float)gScreenHeight,
-                                             0.1f,
-                                             10.0f);
-
-    // Retrieve our location of our perspective matrix uniform 
-    GLint u_ProjectionLocation= glGetUniformLocation( gGraphicsPipelineShaderProgram,"u_Projection");
-    if(u_ProjectionLocation>=0){
-        glUniformMatrix4fv(u_ProjectionLocation,1,GL_FALSE,&perspective[0][0]);
-    }else{
-        std::cout << "Could not find u_Perspective, maybe a mispelling?\n";
-        exit(EXIT_FAILURE);
-    }
-
-		// Bind our texture to slot number 0
-		//gTexture.Bind(0);
-
-		// Setup our uniform for our texture
-		GLint u_textureLocation = glGetUniformLocation(gGraphicsPipelineShaderProgram,"u_DiffuseTexture");
-		std::cout << u_textureLocation << std::endl;
-		if(u_textureLocation>=0){
-			// Setup the slot for the texture
-			glUniform1i(u_textureLocation,0);
-		}else{
-			std::cout << "Could not find u_DiffuseTexture, maybe a misspelling?" << std::endl;
-     	exit(EXIT_FAILURE);
-		}
+	// Setup the skybox
+    gSkybox.MakeSkyBox();
+    std::vector<std::string> filepaths = {"./right.ppm","./left.ppm","./top.ppm","./bottom.ppm","./back.ppm","./front.ppm"};
+    gCubeMapTexture.LoadCubeMapTexture(filepaths);
+    // Setup a graphics pipeline for skyboxes 
+	gCubeMapShaderProgram.CreateShaderProgram("./shaders/cube_vert.glsl","./shaders/cube_frag.glsl");
 
 }
-
 
 
 /**
@@ -516,21 +143,60 @@ void PreDraw(){
 * @return void
 */
 void Draw(){
-  // Enable our attributes
-	glBindVertexArray(gVertexArrayObject);
+	// Disable depth test and face culling.
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
-	// Select the vertex buffer object we want to enable
-  glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObject);
+    // Enable texture mapping
+    glEnable(GL_TEXTURE_2D);
 
-  //Render data
-  glDrawElements(GL_TRIANGLES,
-                    6,
-                    GL_UNSIGNED_INT,
-                    0);
+    // Initialize clear color
+    // This is the background of the screen.
+    glViewport(0, 0, gScreenWidth, gScreenHeight);
+    glClearColor( 1.f, 1.f, 0.f, 1.f );
+
+    //Clear color buffer and Depth Buffer
+  	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+    // Use our shader
+    gGraphicsPipelineShaderProgram.Bind();
+
+    // Model transformation by translating our object into world space
+    glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,g_uOffset)); 
+
+    // Update our model matrix by applying a rotation after our translation
+//    model = glm::rotate(model,glm::radians(g_uRotate),glm::vec3(0.0f,1.0f,0.0f));
+
+    // Setup MVP matrix
+	glDepthMask(GL_FALSE);
+
+	gCubeMapShaderProgram.Bind();
+    gCubeMapShaderProgram.SetUniformMatrix4fv("u_ViewMatrix",gCamera.GetViewMatrix());
+    gCubeMapShaderProgram.SetUniformMatrix4fv("u_Projection",gCamera.GetPerspectiveMatrix(gScreenWidth,gScreenHeight));
+
+	gCubeMapTexture.Bind();
+    gCubeMapShaderProgram.SetUniform1i("u_skybox",0);
+
+	gSkybox.BindAndDraw(false,36);
+
+	glDepthMask(GL_TRUE);
+
+    // Setup MVP matrix
+	gGraphicsPipelineShaderProgram.Bind();
+
+    gGraphicsPipelineShaderProgram.SetUniformMatrix4fv("u_ModelMatrix",model);
+    gGraphicsPipelineShaderProgram.SetUniformMatrix4fv("u_ViewMatrix",gCamera.GetViewMatrix());
+    gGraphicsPipelineShaderProgram.SetUniformMatrix4fv("u_Projection",gCamera.GetPerspectiveMatrix(gScreenWidth,gScreenHeight));
+    // Setup texture uniform
+    gTexture.Bind();
+    gGraphicsPipelineShaderProgram.SetUniform1i("u_DiffuseTexture",0);
+
+    gPlane.BindAndDraw(true,6);
+
+
 
 	// Stop using our current graphics pipeline
-	// Note: This is not necessary if we only have one graphics pipeline.
-  glUseProgram(0);
+    gGraphicsPipelineShaderProgram.Unbind();
 }
 
 
@@ -604,8 +270,6 @@ void Input(){
     int mouseX, mouseY;
     SDL_GetGlobalMouseState(&mouseX,&mouseY);
     gCamera.MouseLook(mouseX,mouseY);
-
-
 }
 
 
@@ -625,9 +289,6 @@ void MainLoop(){
 	while(!gQuit){
 		// Handle Input
 		Input();
-		// Setup anything (i.e. OpenGL State) that needs to take
-		// place before draw calls
-		PreDraw();
 		// Draw Calls in OpenGL
         // When we 'draw' in OpenGL, this activates the graphics pipeline.
         // i.e. when we use glDrawElements or glDrawArrays,
@@ -649,19 +310,14 @@ void MainLoop(){
 * @return void
 */
 void CleanUp(){
-	//Destroy our SDL2 Window
-	SDL_DestroyWindow(gGraphicsApplicationWindow );
-	gGraphicsApplicationWindow = nullptr;
+    //Destroy our SDL2 Window
+    SDL_DestroyWindow(gGraphicsApplicationWindow );
+    gGraphicsApplicationWindow = nullptr;
 
-  // Delete our OpenGL Objects
-  glDeleteBuffers(1, &gVertexBufferObject);
-  glDeleteVertexArrays(1, &gVertexArrayObject);
 
-	// Delete our Graphics pipeline
-  glDeleteProgram(gGraphicsPipelineShaderProgram);
 
-	//Quit SDL subsystems
-	SDL_Quit();
+    //Quit SDL subsystems
+    SDL_Quit();
 }
 
 
@@ -671,24 +327,17 @@ void CleanUp(){
 * @return program status
 */
 int main( int argc, char* args[] ){
-  std::cout << "Use arrow keys to move and rotate\n";
-	std::cout << "Use wasd to move\n";
+    std::cout << "Use arrow keys to move and rotate\n";
+    std::cout << "Use wasd to move\n";
 
-	// 1. Setup the graphics program
-	InitializeProgram();
-	
-	// 2. Setup our geometry
-	VertexSpecification();
-	
-	// 3. Create our graphics pipeline
-	// 	- At a minimum, this means the vertex and fragment shader
-	CreateGraphicsPipeline();
-	
-	// 4. Call the main application loop
-	MainLoop();	
+    // 1. Setup the graphics program
+    InitializeProgram();
 
-	// 5. Call the cleanup function when our program terminates
-	CleanUp();
+    // 4. Call the main application loop
+    MainLoop();	
 
-	return 0;
+    // 5. Call the cleanup function when our program terminates
+    CleanUp();
+
+    return 0;
 }
