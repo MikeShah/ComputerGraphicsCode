@@ -165,9 +165,9 @@ void Draw(){
     glm::mat4 model = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,0.0f,g_uOffset)); 
 
     // Update our model matrix by applying a rotation after our translation
-//    model = glm::rotate(model,glm::radians(g_uRotate),glm::vec3(0.0f,1.0f,0.0f));
+    model = glm::rotate(model,glm::radians(g_uRotate),glm::vec3(0.0f,1.0f,0.0f));
 
-    // Setup MVP matrix
+    // Setup Cube map shader
 	glDepthMask(GL_FALSE);
 
 	gCubeMapShaderProgram.Bind();
@@ -269,7 +269,7 @@ void Input(){
     // Center the mouse in the window
     int mouseX, mouseY;
     SDL_GetGlobalMouseState(&mouseX,&mouseY);
-    gCamera.MouseLook(mouseX,mouseY);
+//    gCamera.MouseLook(mouseX,mouseY);
 }
 
 

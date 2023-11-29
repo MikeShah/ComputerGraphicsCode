@@ -1,5 +1,5 @@
 /** @file CubeMapTexture.hpp
- *  @brief Loads an image and creates an OpenGL texture on the GPU..
+ *  @brief Create a special cube map for skyboxes and other effects
  *  
  *  More...
  *
@@ -38,6 +38,5 @@ private:
     std::vector<Image*> m_images;
 };
 
-
-
 #endif
+
