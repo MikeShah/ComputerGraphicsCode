@@ -259,7 +259,7 @@ class MeshMaker{
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1,3,GL_FLOAT, GL_FALSE,sizeof(float)*m_stride,(char*)(sizeof(float)*3));
             // Add two floats for texture coordinates
-            glEnableVertexAttribArray(1);
+            glEnableVertexAttribArray(2);
             glVertexAttribPointer(2,2,GL_FLOAT, GL_FALSE,sizeof(float)*m_stride,(char*)(sizeof(float)*6));
             
             // Setup an index buffer (IBO)
