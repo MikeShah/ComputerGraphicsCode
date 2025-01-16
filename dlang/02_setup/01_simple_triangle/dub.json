@@ -1,0 +1,17 @@
+{
+	"authors": [
+		"mike"
+	],
+	"copyright": "Copyright © 2025, mike",
+	"dependencies": {
+		"bindbc-opengl": "~>1.1.1",
+		"bindbc-sdl": "~>1.5.1"
+	},
+    "versions":[
+        "GL_41"
+    ],
+    "stringImportPaths":["."],
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "prog"
+}
