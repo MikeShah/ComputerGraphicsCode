@@ -1,3 +1,4 @@
+// @file handles.d
 /// This example is to help understand how 'object oriented C' works in regards to OpenGL and buffer binding.
 /// Effectively, this should helpy you underestand that only one buffer of any type is allowed to be bound
 /// before a draw call.
@@ -5,7 +6,7 @@
 /// one 'state' or one type of 'handle' that is currently bound.
 import std.stdio;
 
-/// Enums are effectively a way to create 'objects' in OpenGL
+/// Enums are effectively a way to create 'object types' in OpenGL
 enum BufferTarget{BUFFER_ARRAY, ELEMENT_ARRAY};
 enum BufferUsage{STATIC,DYNAMIC};
 
@@ -29,7 +30,7 @@ void PrintGlobalContextInfo(){
     writeln;
     // Currently bound buffers
     writeln("Array Buffer Handle currently bound:  ",GlobalOpenGLContext.bufferArrayCurrentHandle);
-    writeln("Elemetn Array Handle currently bound: ",GlobalOpenGLContext.elementArrayCurrentHandle);
+    writeln("Element Array Handle currently bound: ",GlobalOpenGLContext.elementArrayCurrentHandle);
 }
 
 /// A chunk of data 'somewhere
@@ -107,7 +108,6 @@ void BufferData(BufferTarget target, size_t size, void* data,BufferUsage usage){
 
 
 void main(){
-
     ///////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// First Buffer of Data ///////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
@@ -123,11 +123,10 @@ void main(){
     BindBuffer(BufferTarget.BUFFER_ARRAY, handleToMyData);
     // Now for our BufferTarget.BUFFER_ARRAY (bound to handleToMyData), we 
     // set the data.
-    int[] vertices = [ 1,1,1,
-                       2,2,2,
-                       3,3,3];
+    int[] vertices = [1,1,1,
+                      2,2,2,
+                      3,3,3];
     BufferData(BufferTarget.BUFFER_ARRAY, vertices.length*int.sizeof, vertices.ptr,BufferUsage.STATIC);
-
     ///////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// Second Buffer of Data //////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
