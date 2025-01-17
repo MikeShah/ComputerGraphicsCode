@@ -15,10 +15,10 @@ const SDLSupport ret;
 /// executes. Effectively, what I want to do here is make sure that the SDL
 /// library successfully initializes.
 shared static this(){
-        import std.array;
-        writeln("-".replicate(45));
-        writeln("SDL Setup   ".replicate(3));
-        writeln("-".replicate(45));
+		import std.array;
+		writeln("-".replicate(45));
+		writeln("SDL Setup   ".replicate(3));
+		writeln("-".replicate(45));
 
 		// Load the SDL libraries from bindbc-sdl
 		// on the appropriate operating system
@@ -66,7 +66,7 @@ shared static this(){
 						to!string(sdlversion.patch);
 				writeln(msg);
 				if(sdlversion.major==2){
-					writeln("\nNote:   If SDL2 was loaded, it *may*\n\tbe compatible with SDL3 function calls, \n\tbut some functions different.");
+						writeln("\nNote:   If SDL2 was loaded, it *may*\n\tbe compatible with SDL3 function calls, \n\tbut some functions different.");
 				}
 		}
 		// Initialize SDL
@@ -74,7 +74,7 @@ shared static this(){
 				writeln("SDL_Init: ", fromStringz(SDL_GetError()));
 		}
 
-        writeln("-".replicate(40));
+		writeln("-".replicate(40));
 }
 
 /// At the module level, when we terminate, we make sure to 
