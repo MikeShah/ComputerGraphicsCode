@@ -131,12 +131,12 @@ void VertexSpecification(){
 		// Vertex attributes
 		// Atribute #0
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 							  // Attribute Number
-													3, 							  // Size
-													GL_FLOAT, 				// Data Type	
-													GL_FALSE,					// Normalized? 
-													GLfloat.sizeof*3, // Stride 
-													cast(void*)0); 		// Offset
+		glVertexAttribPointer(0, 			    // Attribute Number
+							  3, 			    // Size
+							  GL_FLOAT, 	    // Data Type	
+							  GL_FALSE,		    // Normalized? 
+							  GLfloat.sizeof*3, // Stride 
+							  cast(void*)0);    // Offset
 
 		// Unbind our currently bound Vertex Array Object
 		glBindVertexArray(0);
