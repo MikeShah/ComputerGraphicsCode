@@ -104,7 +104,7 @@ GLuint BuildBasicShader(string vertexShaderSourceFilename, string fragmentShader
 
 
 /// Setup triangle with OpenGL buffers
-void GraphicsSpecification(){
+void VertexSpecification(){
 
 		// Geometry Data
 		const GLfloat[] mVertexData =
@@ -116,7 +116,8 @@ void GraphicsSpecification(){
 
 		// Vertex Arrays Object (VAO) Setup
 		glGenVertexArrays(1, &gMesh.mVAO);
-		// We bind (i.e. select) to the Vertex Array Object (VAO) that we want to work withn.
+		// We bind (i.e. select) to the Vertex Array Object (VAO) 
+		// that we want to work withn.
 		glBindVertexArray(gMesh.mVAO);
 
 		// Vertex Buffer Object (VBO) creation
@@ -130,7 +131,12 @@ void GraphicsSpecification(){
 		// Vertex attributes
 		// Atribute #0
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLfloat.sizeof*3, cast(void*)0);
+		glVertexAttribPointer(0, 							  // Attribute Number
+													3, 							  // Size
+													GL_FLOAT, 				// Data Type	
+													GL_FALSE,					// Normalized? 
+													GLfloat.sizeof*3, // Stride 
+													cast(void*)0); 		// Offset
 
 		// Unbind our currently bound Vertex Array Object
 		glBindVertexArray(0);
@@ -186,7 +192,7 @@ void main(string[] args)
 
 		// Setup the graphics scene
 		InitializeScene();
-		GraphicsSpecification();
+		VertexSpecification();
 
 		// Run the graphics application loop
 		while(gGameIsRunning){
