@@ -12,9 +12,9 @@ void render(){
 
 void main(){
 
-	float vertexDataOnCPU = [-1.0f, 0.0f, 0.0f,
-													  1.0f, 0.0f, 0.0f,
-														0.0f, 1.0f, 0.0f];
+    float vertexDataOnCPU = [-1.0f, 0.0f, 0.0f,
+          1.0f, 0.0f, 0.0f,
+          0.0f, 1.0f, 0.0f];
 
 		while(true){
 				input();
