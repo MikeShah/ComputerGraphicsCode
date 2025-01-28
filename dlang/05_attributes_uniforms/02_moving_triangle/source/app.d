@@ -194,15 +194,18 @@ void Render(){
     // Clear specific buffers (using a bitmask) with the set clear color.
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Choose our graphics pipeline 
+    glUseProgram(gBasicGraphicsPipeline);
+		
+		// After choosing our pipeline, lookup uniform variable.
     GLint location = glGetUniformLocation(gBasicGraphicsPipeline,"uSomeValue");
+
+		// When we find the location, modify the uniform variable.
     if(location > -1){
         glUniform1f(location,gYValue);
     }else{
         writeln("Error, could not find 'uSomeValue'");
     }
-
-    // Choose our graphics pipeline 
-    glUseProgram(gBasicGraphicsPipeline);
 
     // Select the VAO which tells how to navigate buffer data
     // and which buffers are currently bound.

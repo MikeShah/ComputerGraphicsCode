@@ -10,5 +10,7 @@ uniform float uSomeValue;
 void main()
 {
     aColor = color;
-	gl_Position = vec4(position.x, position.y + uSomeValue, position.z, 1.0f);
+		gl_Position = vec4(position.x, position.y + uSomeValue, position.z, 1.0f);
 }
+
+
