@@ -132,9 +132,8 @@ void VertexSpecification(){
             GL_STATIC_DRAW);
 
     // Vertex attributes
-    // Atribute #0
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(0); // Attribute #0 -- position
+    glEnableVertexAttribArray(1); // Attribute #1 -- color
 
     glVertexAttribPointer(0, 	// Attribute Number
             3, 			        // Size
