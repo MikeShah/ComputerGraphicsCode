@@ -31,7 +31,7 @@ void InitializeScene(){
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     // Create an application window using OpenGL that supports SDL
-    gWindow = SDL_CreateWindow( "dlang minimal example - OpenGL",
+    gWindow = SDL_CreateWindow( "dlang indexed mesh example - OpenGL",
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             640,
