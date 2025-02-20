@@ -116,7 +116,7 @@ void VertexSpecification(){
         0.5f,  -0.5f, 0.0f,  	// right vertex position
 				1.0f, 0.0f,						  // vertex texture(vt) coordinate
         0.0f,   0.5f, 0.0f,  	// Top vertex position
-				0.5f, 0.5f,						  // vertex texture(vt) coordinate
+				0.5f, 1.0f,						  // vertex texture(vt) coordinate
         ];
 
     // Vertex Arrays Object (VAO) Setup
@@ -209,7 +209,6 @@ void CreateTexture(string filename, int width, int height){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);	
-
 }
 
 /// Handle input
