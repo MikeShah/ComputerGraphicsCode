@@ -189,7 +189,7 @@ struct GraphicsApp{
 
 		~this(){
 				// Destroy our context
-				SDL_GL_DeleteContext(mContext);
+				SDL_GL_DestroyContext(mContext);
 				// Destroy our window
 				SDL_DestroyWindow(mWindow);
 		}

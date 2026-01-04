@@ -145,7 +145,7 @@ struct GraphicsApp{
 
 				// Setup SDL OpenGL Version
 				SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
-				SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
+				SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 6 );
 				SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 				// We want to request a double buffer for smooth updating.
 				SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -153,11 +153,9 @@ struct GraphicsApp{
 
 				// Create an application window using OpenGL that supports SDL
 				mWindow = SDL_CreateWindow( "dlang - OpenGL",
-								SDL_WINDOWPOS_UNDEFINED,
-								SDL_WINDOWPOS_UNDEFINED,
 								mScreenWidth,
 								mScreenHeight,
-								SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN );
+								SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 
 				// Create the OpenGL context and associate it with our window
 				mContext = SDL_GL_CreateContext(mWindow);
@@ -171,7 +169,7 @@ struct GraphicsApp{
 
 		~this(){
 				// Destroy our context
-				SDL_GL_DeleteContext(mContext);
+				SDL_GL_DestroyContext(mContext);
 				// Destroy our window
 				SDL_DestroyWindow(mWindow);
 		}
@@ -181,12 +179,12 @@ struct GraphicsApp{
 				// Store an SDL Event
 				SDL_Event event;
 				while(SDL_PollEvent(&event)){
-						if(event.type == SDL_QUIT){
+						if(event.type == SDL_EVENT_QUIT){
 								writeln("Exit event triggered (probably clicked 'x' at top of the window)");
 								mGameIsRunning= false;
 						}
-						if(event.type == SDL_KEYDOWN){
-								if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE){
+						if(event.type == SDL_EVENT_KEY_DOWN){
+								if(event.key.key == SDLK_ESCAPE){
 										writeln("Pressed escape key and now exiting...");
 										mGameIsRunning= false;
 								}else{

@@ -5,12 +5,11 @@
 	"copyright": "Copyright © 2025, mike",
 	"dependencies": {
 		"bindbc-opengl": "~>1.1.1",
-		"bindbc-sdl": "~>1.5.1"
+		"bindbc-sdl": "~>2.2.0"
 	},
     "versions":[
-        "GL_43"
+        "GL_46"
     ],
-    "stringImportPaths":["."],
 	"description": "A minimal D application.",
 	"license": "proprietary",
 	"name": "prog"

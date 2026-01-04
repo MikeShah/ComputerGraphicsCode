@@ -36,7 +36,7 @@ void InitializeScene(){
 
     // Setup SDL OpenGL Version
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 6 );
     SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
     // We want to request a double buffer for smooth updating.
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -44,11 +44,9 @@ void InitializeScene(){
 
     // Create an application window using OpenGL that supports SDL
     gWindow = SDL_CreateWindow( "dlang minimal example - OpenGL",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
             640,
             480,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN );
+            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     // Create the OpenGL context and associate it with our window
     gContext = SDL_GL_CreateContext(gWindow);
@@ -255,7 +253,7 @@ void Input(){
     // Store an SDL Event
     SDL_Event event;
     while(SDL_PollEvent(&event)){
-        if(event.type == SDL_QUIT){
+        if(event.type == SDL_EVENT_QUIT){
             writeln("Exit event triggered (probably clicked 'x' at top of the window)");
             gGameIsRunning= false;
         }
@@ -349,7 +347,7 @@ void Render(){
 /// Free any resources acuqired
 void CleanUp(){
     // Destroy our context
-    SDL_GL_DeleteContext(gContext);
+	SDL_GL_DestroyContext(gContext);
     // Destroy our window
     SDL_DestroyWindow(gWindow);
 }

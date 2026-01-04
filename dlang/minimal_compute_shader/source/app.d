@@ -330,7 +330,7 @@ void Render(){
 /// Free any resources acuqired
 void CleanUp(){
     // Destroy our context
-    SDL_GL_DeleteContext(gContext);
+    SDL_GL_DestroyContext(gContext);
     // Destroy our window
     SDL_DestroyWindow(gWindow);
 }
