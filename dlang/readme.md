@@ -14,11 +14,41 @@ So, my goal here is to help you learn the actual *modern* OpenGL that starts aro
 
 ## OpenGL 4.6 Resources
 
-- https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions
-  - This is probably the **key resources** if you already have some experience with OpenGL.
+- Direct State Access (DSA)
+    - The Khronos wikipedia page provides some translation
+        - https://wikis.khronos.org/opengl/Direct_State_Access
+    - https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions
+      - This is probably the **key resources** if you already have some experience with OpenGL.
+    - https://ktstephano.github.io/rendering/opengl/dsa
+        - This resource again motivates the DSA style of functions with OpenGL with several examples.
 - https://juandiegomontoya.github.io/modern_opengl.html
   - Nice blog on some of the Modern OpenGL 4.6 features and how to apply them. One important thing is the idea of mimicking the newer APIs 'pipeline' passes (i.e. bundling the state and geometry needed to render in one object). There's also some nice advice on tying state to each glDraw* command, and then making sure to use something like RAII to ensure there are no data leaks.
   - The author also implemented this functionality in their engine here: https://github.com/JuanDiegoMontoya/Fwog
+
+## Motivating Direct State Access (DSA)
+
+Direct State Access (DSA) is the new OpenGL 4.5/4.6 way of working with familiar 'modern opengl' commands. But what does this 'DSA' actually mean?
+
+The first thing to note, is the API change to functions that effectively allow you to do the 'same thing'. That is, we have a new family of `glCreate*` functions, instead of the `glGen* + glBind*` functions. `glCreate*` functions are generally easier and more predictable to use. There is a nice example below highlighting the 'principle of least surprise' with the glCreate* functions -- which in my opinion is a good thing. The old glGenBuffers did a sort of lazy initialization, to create a new buffer in two steps, which I think is a tougher API to use and debug (one might argue that each function should in fact only do one thing, but in this case, the goal is to simply 'create' a buffer -- this is a bit of a digression, but I again think it is simply easier to use the glCreate functions).
+
+> From: https://stackoverflow.com/questions/31841494/difference-in-glgenbuffers-and-glcreatebuffers
+>
+> The simple answer is glGenBuffers requires glBindBuffer to actually create the buffer object.
+>
+> glGenBuffers(n, buffers):
+> 
+> No buffer objects are associated with the returned buffer object names until they are first bound by calling glBindBuffer.
+> 
+> glCreateBuffers(n, buffers):
+>
+> glCreateBuffers returns n previously unused buffer names in buffers, each representing a new buffer object initialized as if it had been bound to an unspecified target.
+> 
+> glGenBuffers(1,&vbo) // not created yet
+> glIsBuffer(vbo) // false
+> glBindBuffer(GL_ARRAY_BUFFER,vbo) // created here
+> glIsBuffer(vbo) // true
+> glCreateBuffers(1,&vbo) // created right away so we don't need to bind it
+> glIsBuffer(vbo) // true
 
 ## Compute Shaders
 
