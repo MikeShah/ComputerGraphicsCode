@@ -1,5 +1,5 @@
 // code.cpp
-// Compile & run: g++-12 -std=c++23 code.cpp -o prog && ./prog
+// Compile & run: g++ -std=c++23 code.cpp -o prog && ./prog
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -8,12 +8,12 @@
 int main(){
 
 	float vertexData[] = {1.0f, 1.0f, 1.0f,
-												0.0f, 0.0f, 0.0f,
-												2.0f, 0.0f, 1.0f};
+						  0.0f, 0.0f, 0.0f,
+						  2.0f, 0.0f, 1.0f};
 
 	std::vector vertexData2{1.0f, 1.0f, 1.0f,
-													0.0f, 0.0f, 0.0f,
-													2.0f, 0.0f, 1.0f};
+							0.0f, 0.0f, 0.0f,
+							2.0f, 0.0f, 1.0f};
 	
 	for(auto v : vertexData2){
 		std::cout << v << " ";	
