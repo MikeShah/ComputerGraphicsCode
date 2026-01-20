@@ -97,34 +97,33 @@ Mesh MakeTriangleFactory(){
 		pragma(msg, "Vertex data length: "~mVertexData.length.to!string);
 
 		// Vertex Buffer Object (VBO) creation
-    glCreateBuffers(1,&m.mVBO);
-    glNamedBufferStorage(m.mVBO, mVertexData.length* GLfloat.sizeof, mVertexData.ptr, 0);
-
+		glCreateBuffers(1,&m.mVBO);
+		glNamedBufferStorage(m.mVBO, mVertexData.length* GLfloat.sizeof, mVertexData.ptr, 0);
 
 		// Vertex Arrays Object (VAO) Setup
 		glCreateVertexArrays(1, &m.mVAO);
-    // Associate Vertex Buffer with Vertex Array Object
-    glVertexArrayVertexBuffer(m.mVAO, // VAO we are working with (Direct State Access (DSA)
-                              0,      // Bind VBO to '0' binding point for this specific VAO -- this is not
-                                      // the 'VBO' number, because these could repeat or be swapped.
-                              m.mVBO, // This is the VBO we bind to '0'
-                              0,      // Offset into data
-                              GLfloat.sizeof*6); // Stride of data
+		// Associate Vertex Buffer with Vertex Array Object
+		glVertexArrayVertexBuffer(	m.mVAO, // VAO we are working with (Direct State Access (DSA)
+									0,      // Bind VBO to '0' binding point for this specific VAO -- this is not
+										// the 'VBO' number, because these could repeat or be swapped.
+									m.mVBO, // This is the VBO we bind to '0'
+									0,      // Offset into data
+									GLfloat.sizeof*6); // Stride of data
 
 		// Enable our needed Vertex attributes
 		glEnableVertexArrayAttrib(m.mVAO,0);
 		glEnableVertexArrayAttrib(m.mVAO,1);
-    // Associate VAO attribute
-    glVertexArrayAttribBinding(m.mVAO,0,0);
-    glVertexArrayAttribBinding(m.mVAO,1,0);
+		// Associate VAO attribute
+		glVertexArrayAttribBinding(m.mVAO,0,0);
+		glVertexArrayAttribBinding(m.mVAO,1,0);
 
-    // Set up each attribute
+		// Set up each attribute
 		// Attribute #1
 		glVertexArrayAttribFormat(m.mVAO,0, 3, GL_FLOAT, GL_FALSE, cast(GLvoid*)0);
 		glVertexArrayAttribFormat(m.mVAO,1, 3, GL_FLOAT, GL_FALSE, cast(GLvoid*)(GLfloat.sizeof*3));
 
 
-    writeln("Mesh is", m);
+		writeln("Mesh is", m);
 
 		return m;
 }
