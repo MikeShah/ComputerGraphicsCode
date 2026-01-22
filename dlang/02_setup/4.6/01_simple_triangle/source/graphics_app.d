@@ -78,6 +78,11 @@ GLuint BuildBasicShader(string vertexShaderSourceFilename, string fragmentShader
 struct Mesh{
 		GLuint mVAO;
 		GLuint mVBO;
+
+    // Specially named function that is automatically called when printing.
+    string toString(){
+      return "VAO("~mVAO.to!string~") VBO("~mVBO.to!string~")";
+    }
 }
 
 /// Setup triangle with OpenGL buffers
