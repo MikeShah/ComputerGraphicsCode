@@ -12,11 +12,19 @@ OpenGL has been around since at least 1992. Depending on when you read this, tha
 
 So, my goal here is to help you learn the actual *modern* OpenGL that starts around OpenGL 4.5 (2014) and continues to the latest release of OpenGL 4.6 (2017). OpenGL continues to get extensions as well (even including things like [Mesh Shaders](https://www.supergoodcode.com/mesh-shaders-in-the-current-year/) which modern graphics APIs have)
 
+# Hello World in OpenGL 4.6 with D explained
+
+
+```d
+```
+
 ## OpenGL 4.6 Resources
 
 - Direct State Access (DSA)
     - The Khronos wikipedia page provides some translation
         - https://wikis.khronos.org/opengl/Direct_State_Access
+    - Short 5-minute video on Modern OpenGL (DSA)
+        - https://www.youtube.com/watch?v=cadzqhqPqVA
     - https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions
       - This is probably the **key resources** if you already have some experience with OpenGL.
     - https://ktstephano.github.io/rendering/opengl/dsa
