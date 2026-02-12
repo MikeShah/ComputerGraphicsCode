@@ -15,38 +15,38 @@ SDL_Window* gWindow;
 
 /// Structure for a 'mesh'
 struct Mesh{
-		GLuint mTexID;	// Texture ID
-    GLuint mVAO;
-    GLuint mVBO;
+  GLuint mTexID;	// Texture ID
+  GLuint mVAO;
+  GLuint mVBO;
 }
 
 /// Setup SDL and OpenGL Libraries
 void InitializeScene(){
 
-    // Setup SDL OpenGL Version
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 6 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-    // We want to request a double buffer for smooth updating.
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  // Setup SDL OpenGL Version
+  SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
+  SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 6 );
+  SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+  // We want to request a double buffer for smooth updating.
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    // Create an application window using OpenGL that supports SDL
-    gWindow = SDL_CreateWindow( "dlang minimal example - OpenGL",
-            640,
-            480,
-            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  // Create an application window using OpenGL that supports SDL
+  gWindow = SDL_CreateWindow( "dlang minimal example - OpenGL",
+      640,
+      480,
+      SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-    // Create the OpenGL context and associate it with our window
-    gContext = SDL_GL_CreateContext(gWindow);
+  // Create the OpenGL context and associate it with our window
+  gContext = SDL_GL_CreateContext(gWindow);
 
-    // Load OpenGL Function calls
-    auto retVal = LoadOpenGLLib();
+  // Load OpenGL Function calls
+  auto retVal = LoadOpenGLLib();
 
-    // Check OpenGL version
-    GetOpenGLVersionInfo();
-    // Build a basic shader
-    gBasicGraphicsPipeline = BuildBasicShader("./pipelines/basic/basic.vert","./pipelines/basic/basic.frag");
+  // Check OpenGL version
+  GetOpenGLVersionInfo();
+  // Build a basic shader
+  gBasicGraphicsPipeline = BuildBasicShader("./pipelines/basic/basic.vert","./pipelines/basic/basic.frag");
 }
 
 /// Create a basic shader
@@ -54,140 +54,140 @@ void InitializeScene(){
 /// that is compiled and ready to execute on the GPU.
 GLuint BuildBasicShader(string vertexShaderSourceFilename, string fragmentShaderSourceFilename){
 
-    import std.file, std.string;
-    GLuint programObjectID;
+  import std.file, std.string;
+  GLuint programObjectID;
 
-    // Compile our shaders
-    GLuint vertexShader;
-    GLuint fragmentShader;
+  // Compile our shaders
+  GLuint vertexShader;
+  GLuint fragmentShader;
 
-    // Use a string mixin to simply 'load' the text from a file into these
-    // strings that will otherwise be processed.
-    string vertexSource 	= readText(vertexShaderSourceFilename);
-    string fragmentSource 	= readText(fragmentShaderSourceFilename);
+  // Use a string mixin to simply 'load' the text from a file into these
+  // strings that will otherwise be processed.
+  string vertexSource 	= readText(vertexShaderSourceFilename);
+  string fragmentSource 	= readText(fragmentShaderSourceFilename);
 
-    // Compile vertex shader
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char* vSource = vertexSource.ptr;
-    glShaderSource(vertexShader, 1, &vSource, null);
-    glCompileShader(vertexShader);
+  // Compile vertex shader
+  vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  const char* vSource = vertexSource.ptr;
+  glShaderSource(vertexShader, 1, &vSource, null);
+  glCompileShader(vertexShader);
 
-    // Compile fragment shader
-    fragmentShader= glCreateShader(GL_FRAGMENT_SHADER);
-    const char* fSource = fragmentSource.ptr;
-    glShaderSource(fragmentShader, 1, &fSource, null);
-    glCompileShader(fragmentShader);
+  // Compile fragment shader
+  fragmentShader= glCreateShader(GL_FRAGMENT_SHADER);
+  const char* fSource = fragmentSource.ptr;
+  glShaderSource(fragmentShader, 1, &fSource, null);
+  glCompileShader(fragmentShader);
 
-    // Create shader pipeline
-    programObjectID = glCreateProgram();
+  // Create shader pipeline
+  programObjectID = glCreateProgram();
 
-    // Link our two shader programs together.
-    // Consider this the equivalent of taking two .cpp files, and linking them into
-    // one executable file.
-    glAttachShader(programObjectID,vertexShader);
-    glAttachShader(programObjectID,fragmentShader);
-    glLinkProgram(programObjectID);
+  // Link our two shader programs together.
+  // Consider this the equivalent of taking two .cpp files, and linking them into
+  // one executable file.
+  glAttachShader(programObjectID,vertexShader);
+  glAttachShader(programObjectID,fragmentShader);
+  glLinkProgram(programObjectID);
 
-    // Validate our program
-    glValidateProgram(programObjectID);
+  // Validate our program
+  glValidateProgram(programObjectID);
 
-    // Once our final program Object has been created, we can
-    // detach and then delete our individual shaders.
-    glDetachShader(programObjectID,vertexShader);
-    glDetachShader(programObjectID,fragmentShader);
-    // Delete the individual shaders once we are done
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+  // Once our final program Object has been created, we can
+  // detach and then delete our individual shaders.
+  glDetachShader(programObjectID,vertexShader);
+  glDetachShader(programObjectID,fragmentShader);
+  // Delete the individual shaders once we are done
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
 
-    return programObjectID;
+  return programObjectID;
 }
 
 
 /// Setup triangle with OpenGL buffers
 void VertexSpecification(){
 
-    // Geometry Data
-    const GLfloat[] mVertexData =
-        [
-        -0.5f,  -0.5f, 0.0f, 	// Left vertex position
-				0.0f, 0.0f,						  // vertex texture(vt) coordinate
-        0.5f,  -0.5f, 0.0f,  	// right vertex position
-				1.0f, 0.0f,						  // vertex texture(vt) coordinate
-        0.0f,   0.5f, 0.0f,  	// Top vertex position
-				0.5f, 1.0f,						  // vertex texture(vt) coordinate
-        ];
+  // Geometry Data
+  const GLfloat[] mVertexData =
+    [
+    -0.5f,  -0.5f, 0.0f, 	// Left vertex position
+    0.0f, 0.0f,						  // vertex texture(vt) coordinate
+    0.5f,  -0.5f, 0.0f,  	// right vertex position
+    1.0f, 0.0f,						  // vertex texture(vt) coordinate
+    0.0f,   0.5f, 0.0f,  	// Top vertex position
+    0.5f, 1.0f,						  // vertex texture(vt) coordinate
+    ];
 
-    // Vertex Arrays Object (VAO) Setup
-    glCreateVertexArrays(1,&gMesh.mVAO);
+  // Vertex Arrays Object (VAO) Setup
+  glCreateVertexArrays(1,&gMesh.mVAO);
 
-    // Vertex Buffer Object (VBO) creation
-    glCreateBuffers(1,&gMesh.mVBO);
+  // Vertex Buffer Object (VBO) creation
+  glCreateBuffers(1,&gMesh.mVBO);
 
-    glNamedBufferStorage(gMesh.mVBO,mVertexData.length* GLfloat.sizeof, mVertexData.ptr, 0);
+  glNamedBufferStorage(gMesh.mVBO,mVertexData.length* GLfloat.sizeof, mVertexData.ptr, 0);
 
-    glVertexArrayVertexBuffer(gMesh.mVAO,0,gMesh.mVBO,0,GLfloat.sizeof*5); 
-    
-    glEnableVertexArrayAttrib(gMesh.mVAO,0);
-    glEnableVertexArrayAttrib(gMesh.mVAO,1);
-    // Associate VAO attribute
-    glVertexArrayAttribBinding(gMesh.mVAO,0,0);
-    glVertexArrayAttribBinding(gMesh.mVAO,1,0);
+  glVertexArrayVertexBuffer(gMesh.mVAO,0,gMesh.mVBO,0,GLfloat.sizeof*5); 
 
-    // Set up each attribute
-    // Attribute #1
-    glVertexArrayAttribFormat(gMesh.mVAO,0, 3, GL_FLOAT, GL_FALSE, cast(GLvoid*)0);
-    // Set up texture attribute
-    // Attribute #1
-    glVertexArrayAttribFormat(gMesh.mVAO,1, 2, GL_FLOAT, GL_FALSE, cast(GLvoid*)(GLfloat.sizeof*3));
+  glEnableVertexArrayAttrib(gMesh.mVAO,0);
+  glEnableVertexArrayAttrib(gMesh.mVAO,1);
+  // Associate VAO attribute
+  glVertexArrayAttribBinding(gMesh.mVAO,0,0);
+  glVertexArrayAttribBinding(gMesh.mVAO,1,0);
+
+  // Set up each attribute
+  // Attribute #1
+  glVertexArrayAttribFormat(gMesh.mVAO,0, 3, GL_FLOAT, GL_FALSE, cast(GLvoid*)0);
+  // Set up texture attribute
+  // Attribute #1
+  glVertexArrayAttribFormat(gMesh.mVAO,1, 2, GL_FLOAT, GL_FALSE, cast(GLvoid*)(GLfloat.sizeof*3));
 }
 
 // Simple PPM image loader
 ubyte[] LoadPPMImage(string filename){
-    import std.file, std.conv, std.algorithm, std.range, std.stdio;
+  import std.file, std.conv, std.algorithm, std.range, std.stdio;
 
-    ubyte[] result;
-    auto f = File(filename);
-    int counter=0;
-    foreach(line ; f.byLine()){
-        counter++;
-        if(counter >= 5){
-            result ~= line.to!ubyte;
-        }
+  ubyte[] result;
+  auto f = File(filename);
+  int counter=0;
+  foreach(line ; f.byLine()){
+    counter++;
+    if(counter >= 5){
+      result ~= line.to!ubyte;
     }
-    // Flip the image pixels from image space to screen space
-    result = result.reverse;
-    // Swizzle the bytes back to RGB order	
-    foreach(rgb ; result.slide(3)){
-        rgb.reverse;
-    }
+  }
+  // Flip the image pixels from image space to screen space
+  result = result.reverse;
+  // Swizzle the bytes back to RGB order	
+  foreach(rgb ; result.slide(3)){
+    rgb.reverse;
+  }
 
-    return result;
+  return result;
 }
 
 /// Create a new texture
 void CreateTexture(string filename, int width, int height){
 
   // Load image data
-	ubyte[] image_data = LoadPPMImage(filename);
+  ubyte[] image_data = LoadPPMImage(filename);
 
   glCreateTextures(GL_TEXTURE_2D,1,&gMesh.mTexID);
   // Setup storage for all levelso of a 2D texture
   glTextureStorage2D(gMesh.mTexID, 	// Texture name
-            1, 			// Levels (1 level by default)
-            GL_RGBA8,	// Internal format
-            width,		// width
-            height);	// Height
+      1, 			// Levels (1 level by default)
+      GL_RGBA8,	// Internal format
+      width,		// width
+      height);	// Height
 
   // Set the pixels in the allocated storage
   glTextureSubImage2D(gMesh.mTexID,
-            0,// Base level data (0th detail or 'mip' level which is the base)
-            0,				// x Offset
-            0,				// y offset
-            width,
-            height,			
-            GL_RGB,			 // format of the pixel data
-            GL_UNSIGNED_BYTE,// type of 'pixel data'
-            image_data.ptr); // pointer to data
+      0,// Base level data (0th detail or 'mip' level which is the base)
+      0,				// x Offset
+      0,				// y offset
+      width,
+      height,			
+      GL_RGB,			 // format of the pixel data
+      GL_UNSIGNED_BYTE,// type of 'pixel data'
+      image_data.ptr); // pointer to data
 
   glGenerateTextureMipmap(gMesh.mTexID);
 
@@ -199,14 +199,14 @@ void CreateTexture(string filename, int width, int height){
 
 /// Handle input
 void Input(){
-    // Store an SDL Event
-    SDL_Event event;
-    while(SDL_PollEvent(&event)){
-        if(event.type == SDL_EVENT_QUIT){
-            writeln("Exit event triggered (probably clicked 'x' at top of the window)");
-            gGameIsRunning= false;
-        }
+  // Store an SDL Event
+  SDL_Event event;
+  while(SDL_PollEvent(&event)){
+    if(event.type == SDL_EVENT_QUIT){
+      writeln("Exit event triggered (probably clicked 'x' at top of the window)");
+      gGameIsRunning= false;
     }
+  }
 }
 
 
@@ -216,65 +216,65 @@ void Update(){
 
 /// Render the graphics scene
 void Render(){
-    // Set the color of the pixels in all of our color buffers
-    // when we clear the screen.
-    // Note: glClearDepth, glClearStencil are other functions to clear.
-    glClearColor(0.0f,0.6f,0.8f,1.0f);
-    // Clear specific buffers (using a bitmask) with the set clear color.
-    glClear(GL_COLOR_BUFFER_BIT);
+  // Set the color of the pixels in all of our color buffers
+  // when we clear the screen.
+  // Note: glClearDepth, glClearStencil are other functions to clear.
+  glClearColor(0.0f,0.6f,0.8f,1.0f);
+  // Clear specific buffers (using a bitmask) with the set clear color.
+  glClear(GL_COLOR_BUFFER_BIT);
 
-    // Choose our graphics pipeline 
-    glUseProgram(gBasicGraphicsPipeline);
+  // Choose our graphics pipeline 
+  glUseProgram(gBasicGraphicsPipeline);
 
-    // Bind our texture
-    glBindTextureUnit(0,gMesh.mTexID);
+  // Bind our texture
+  glBindTextureUnit(0,gMesh.mTexID);
 
-		GLint sampler1 = glGetUniformLocation(gBasicGraphicsPipeline,"sampler1");
-		if(sampler1 <0 ){
-				writeln("Could not find 'sampler1'");
-				exit(1);
-		}
-		glUniform1i(sampler1,0);
+  GLint sampler1 = glGetUniformLocation(gBasicGraphicsPipeline,"sampler1");
+  if(sampler1 <0 ){
+    writeln("Could not find 'sampler1'");
+    exit(1);
+  }
+  glUniform1i(sampler1,0);
 
 
-    // Select the VAO which tells how to navigate buffer data
-    // and which buffers are currently bound.
-    glBindVertexArray(gMesh.mVAO);
+  // Select the VAO which tells how to navigate buffer data
+  // and which buffers are currently bound.
+  glBindVertexArray(gMesh.mVAO);
 
-    // Call our draw function on the currently bound
-    // vertex array (and any associated buffers, e.g. VBO)
-    // This 'activates' and starts our graphics pipeline, sending
-    // data to our shader in triples (i.e. GL_TRIANGLES)
-    glDrawArrays(GL_TRIANGLES,0,3);
+  // Call our draw function on the currently bound
+  // vertex array (and any associated buffers, e.g. VBO)
+  // This 'activates' and starts our graphics pipeline, sending
+  // data to our shader in triples (i.e. GL_TRIANGLES)
+  glDrawArrays(GL_TRIANGLES,0,3);
 
-    // OpenGL 'draws' into a default backbuffer, and then we
-    // 'flip' what is in the backbuffer to the frontbuffer.
-    // The 'front' and 'back' buffers make a 'framebuffer', which
-    // we'll learn about later.
-    SDL_GL_SwapWindow(gWindow);
+  // OpenGL 'draws' into a default backbuffer, and then we
+  // 'flip' what is in the backbuffer to the frontbuffer.
+  // The 'front' and 'back' buffers make a 'framebuffer', which
+  // we'll learn about later.
+  SDL_GL_SwapWindow(gWindow);
 }
 
 /// Free any resources acuqired
 void CleanUp(){
-    // Destroy our context
-	SDL_GL_DestroyContext(gContext);
-    // Destroy our window
-    SDL_DestroyWindow(gWindow);
+  // Destroy our context
+  SDL_GL_DestroyContext(gContext);
+  // Destroy our window
+  SDL_DestroyWindow(gWindow);
 }
 /// Program entry point 
 /// NOTE: When debugging, this is '_Dmain'
 void main(string[] args)
 {
 
-    // Setup the graphics scene
-    InitializeScene();
-    VertexSpecification();
-	CreateTexture("sample.ppm",256,256);
+  // Setup the graphics scene
+  InitializeScene();
+  VertexSpecification();
+  CreateTexture("sample.ppm",256,256);
 
-    // Run the graphics application loop
-    while(gGameIsRunning){
-        Input();
-        Update();
-        Render();
-    }
+  // Run the graphics application loop
+  while(gGameIsRunning){
+    Input();
+    Update();
+    Render();
+  }
 }
