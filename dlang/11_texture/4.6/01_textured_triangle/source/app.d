@@ -167,9 +167,11 @@ ubyte[] LoadPPMImage(string filename){
 /// Create a new texture
 void CreateTexture(string filename, int width, int height){
 
-  // Load image data
+  // Load image/pixel data from CPU
   ubyte[] image_data = LoadPPMImage(filename);
 
+  // Create new 'named' texture object for GPU -- need
+  // to specify the texture type here as GL_TEXTURE_2D.
   glCreateTextures(GL_TEXTURE_2D,1,&gMesh.mTexID);
   // Setup storage for all levelso of a 2D texture
   glTextureStorage2D(gMesh.mTexID, 	// Texture name
