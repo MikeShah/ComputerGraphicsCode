@@ -197,7 +197,6 @@ void CleanUp(){
 /// NOTE: When debugging, this is '_Dmain'
 void main(string[] args)
 {
-
 	// Setup the graphics scene
 	InitializeScene();
 	VertexSpecification();
