@@ -10,6 +10,7 @@
 #define IMAGE_HPP
 
 #include <string>
+#include <cstdint>
 
 class Image {
 public:
